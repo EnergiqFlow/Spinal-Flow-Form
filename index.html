@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spinal Flow Wellness Questionnaire</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .step-content {
+            display: none;
+        }
+        
+        .step-content.active {
+            display: block;
+        }
+        
+        .progress-circle {
+            transition: all 0.5s ease;
+        }
+        
+        .progress-circle.completed {
+            background: linear-gradient(135deg, #475569, #334155);
+            border-color: #fb923c;
+            box-shadow: 0 0 15px rgba(251, 146, 60, 0.6), 0 0 30px rgba(251, 146, 60, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .copper-text {
+            color: #b45309;
+        }
+        
+        .custom-range::-webkit-slider-thumb {
+            background: #b45309;
+        }
+        
+        .custom-range::-moz-range-thumb {
+            background: #b45309;
+        }
+        
+        input[type="checkbox"]:checked,
+        input[type="radio"]:checked {
+            background-color: #b45309;
+            border-color: #b45309;
+        }
+        
+        .symptom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 8px;
+        }
+        
+        @media (max-width: 640px) {
+            .symptom-grid {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+        }
+        
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .symptom-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .form-section {
+            background: rgba(247, 243, 240, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid rgba(240, 230, 210, 0.5);
+        }
+        
+        @media (max-width: 640px) {
+            .form-section {
+                padding: 16px !important;
+                margin: 16px 8px !important;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
+            
+            input, textarea, select {
+                font-size: 16px !important;
+            }
+            
+            .step-title {
+                font-size: 18px !important;
+            }
+        }
+        
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .form-section {
+                padding: 24px !important;
+            }
+        }
+        
+        input[type="checkbox"], 
+        input[type="radio"] {
+            min-width: 18px;
+            min-height: 18px;
+        }
+        
+        @media (max-width: 640px) {
+            input[type="checkbox"], 
+            input[type="radio"] {
+                min-width: 20px;
+                min-height: 20px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .navigation-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .navigation-buttons button {
+                width: 100% !important;
+                padding: 16px !important;
+                font-size: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen" style="background: linear-gradient(135deg, #b45309 0%, #475569 50%, #334155 100%);">
+    <div class="absolute inset-0 opacity-30" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23d4a574\' fill-opacity=\'0.15\'%3E%3Ccircle cx=\'10\' cy=\'10\' r=\'2\'/%3E%3Ccircle cx=\'30\' cy=\'20\' r=\'1.5\'/%3E%3Ccircle cx=\'50\' cy=\'30\' r=\'1\'/%3E%3Ccircle cx=\'20\' cy=\'40\' r=\'1.5\'/%3E%3Ccircle cx=\'40\' cy=\'50\' r=\'2\'/%3E%3C/g%3E%3C/svg%3E');"></div>
+    
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 relative z-10">
+        <!-- Progress Indicators -->
+        <div class="mb-6 sm:mb-8">
+            <div class="relative mb-12 sm:mb-16">
+                <!-- Flow lines -->
+                <svg class="absolute inset-0 w-full h-32 sm:h-40" viewBox="0 0 900 160" preserveAspectRatio="none">
+                    <path d="M80,80 Q200,60 320,100 Q440,120 560,60 Q680,20 800,80" stroke="url(#spinalFlowGradient)" stroke-width="10" fill="none" class="opacity-85"/>
+                    <defs>
+                        <linearGradient id="spinalFlowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#1e293b" />
+                            <stop offset="30%" stop-color="#475569" />
+                            <stop offset="50%" stop-color="#b45309" />
+                            <stop offset="70%" stop-color="#475569" />
+                            <stop offset="100%" stop-color="#1e293b" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                
+                <!-- Progress circles -->
+                <div class="relative h-32 sm:h-40" id="progressContainer">
+                    <!-- Circles will be generated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="w-full bg-stone-200 h-3 rounded-full shadow-inner">
+                <div id="progressBar" class="h-full rounded-full transition-all duration-700 shadow-sm" style="width: 14.3%; background: linear-gradient(to right, #c49363, #475569, #b45309);"></div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form id="spinalFlowForm" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST" class="form-section p-6 sm:p-8 mb-6 sm:mb-8">
+            
+            <!-- Step 0: Welcome -->
+            <div class="step-content active" data-step="0">
+                <div class="text-center space-y-6 sm:space-y-8">
+                    <div class="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 mx-auto rounded-full flex items-center justify-center shadow-2xl relative overflow-hidden" style="background: linear-gradient(135deg, #475569 0%, #334155 100%);">
+                        <div class="absolute inset-0" style="background: linear-gradient(135deg, rgba(71, 85, 105, 0.3) 0%, rgba(51, 65, 85, 0.6) 100%);"></div>
+                        <div class="relative z-10">
+                            <div class="text-2xl sm:text-3xl lg:text-4xl font-serif tracking-wide mb-2 copper-text" style="font-family: Georgia, serif;">
+                                <span class="relative">
+                                    <span>Ene</span>
+                                    <span class="relative inline-block">
+                                        <span>r</span>
+                                        <svg viewBox="0 0 24 24" fill="#b45309" class="absolute w-3 h-3 sm:w-4 sm:h-4 opacity-95" style="top: -2px; right: -2px; transform: rotate(-15deg);">
+                                            <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+                                        </svg>
+                                    </span>
+                                    <span>giq</span>
+                                </span>
+                            </div>
+                            <div class="text-xs sm:text-sm font-light tracking-widest" style="color: #d97706;">SPINAL FLOW</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-light text-slate-800 mb-4">Spinal Flow Wellness Journey</h1>
+                        <p class="text-lg sm:text-xl text-slate-600 italic mb-6">"A little action often spurs a lot of momentum" - Noah Scalin</p>
+                        <div class="max-w-2xl mx-auto text-slate-700 leading-relaxed text-sm sm:text-base">
+                            <p class="mb-4">Welcome to your wellness journey. There is an innate intelligence inside every human body to grow, repair, and heal itself.</p>
+                            <p>The Spinal Flow Technique is a philosophy, a science, and an intuitive hands-on approach that helps your spine and nervous system release stored stressors, enabling your body's natural healing wisdom to flow freely.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 1: Personal Information -->
+            <div class="step-content" data-step="1">
+                <h2 class="text-xl sm:text-2xl font-light text-slate-800 text-center mb-6 sm:mb-8">Let's get to know you</h2>
+                
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-2">First Name *</label>
+                            <input type="text" name="firstName" required class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all" placeholder="Your first name">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-2">Last Name *</label>
+                            <input type="text" name="lastName" required class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all" placeholder="Your last name">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-3">Age Range</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="age" value="18-25" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">18-25</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="age" value="26-50" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">26-50</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="age" value="51-75" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">51-75</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="age" value="76+" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">76+</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-3">Weight Range</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="weight" value="<50 kg" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">&lt;50 kg</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="weight" value="50-69 kg" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">50-69 kg</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="weight" value="70-89 kg" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">70-89 kg</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="weight" value="90-109 kg" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">90-109 kg</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="weight" value=">110 kg" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">&gt;110 kg</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">How are you feeling right now?</label>
+                        <textarea name="currentSymptoms" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent h-24" placeholder="Tell us about your current state of health and any symptoms you're experiencing..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Current Wellness -->
+            <div class="step-content" data-step="2">
+                <h2 class="text-xl sm:text-2xl font-light text-slate-800 text-center mb-6 sm:mb-8">Your Current Wellness</h2>
+                
+                <div class="space-y-6 sm:space-y-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-4">Stress Level (1-10)</label>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-slate-500">Low</span>
+                                <input type="range" name="stressLevel" min="1" max="10" value="5" class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer custom-range">
+                                <span class="text-sm text-slate-500">High</span>
+                                <span class="w-8 text-center font-medium copper-text" id="stressValue">5</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-4">Happiness Level (1-10)</label>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-slate-500">Low</span>
+                                <input type="range" name="happinessLevel" min="1" max="10" value="5" class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer custom-range">
+                                <span class="text-sm text-slate-500">High</span>
+                                <span class="w-8 text-center font-medium copper-text" id="happinessValue">5</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-4">What is your body telling you? (Select all that apply)</label>
+                        <div class="symptom-grid" id="symptomsContainer">
+                            <!-- Symptoms will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Lifestyle -->
+            <div class="step-content" data-step="3">
+                <h2 class="text-xl sm:text-2xl font-light text-slate-800 text-center mb-6 sm:mb-8">Lifestyle & Daily Habits</h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-3">How would you describe your current activity level?</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="activityLevel" value="Sedentary (little to no exercise)" class="w-4 h-4 text-amber-600">
+                                <span class="text-slate-700">Sedentary (little to no exercise)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="activityLevel" value="Lightly active (light exercise 1-3 days/week)" class="w-4 h-4 text-amber-600">
+                                <span class="text-slate-700">Lightly active (light exercise 1-3 days/week)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="activityLevel" value="Moderately active (moderate exercise 3-5 days/week)" class="w-4 h-4 text-amber-600">
+                                <span class="text-slate-700">Moderately active (moderate exercise 3-5 days/week)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="activityLevel" value="Very active (hard exercise 6-7 days/week)" class="w-4 h-4 text-amber-600">
+                                <span class="text-slate-700">Very active (hard exercise 6-7 days/week)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-2">Hours of sleep per night</label>
+                            <input type="text" name="sleepHours" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all" placeholder="e.g., 7-8 hours">
+                        </div>
+
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-3">Sleep quality</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="sleepQuality" value="Excellent" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">Excellent</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="sleepQuality" value="Good" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">Good</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="sleepQuality" value="Fair" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">Fair</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="sleepQuality" value="Poor" class="w-4 h-4 text-amber-600">
+                                    <span class="text-slate-700">Poor</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-4">Do you consume any of the following regularly? (Select all that apply)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-slate-50 rounded">
+                                <input type="checkbox" name="consumptions" value="Caffeine" class="w-4 h-4 text-amber-600 rounded">
+                                <span class="text-sm text-slate-700">Caffeine</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-slate-50 rounded">
+                                <input type="checkbox" name="consumptions" value="Alcohol" class="w-4 h-4 text-amber-600 rounded">
+                                <span class="text-sm text-slate-700">Alcohol</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-slate-50 rounded">
+                                <input type="checkbox" name="consumptions" value="Tobacco" class="w-4 h-4 text-amber-600 rounded">
+                                <span class="text-sm text-slate-700">Tobacco</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-slate-50 rounded">
+                                <input type="checkbox" name="consumptions" value="Processed foods" class="w-4 h-4 text-amber-600 rounded">
+                                <span class="text-sm text-slate-700">Processed foods</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-slate-50 rounded">
+                                <input type="checkbox" name="consumptions" value="Sugar" class="w-4 h-4 text-amber-600 rounded">
+                                <span class="text-sm text-slate-700">Sugar</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-slate-50 rounded">
+                                <input type="checkbox" name="consumptions" value="None of the above" class="w-4 h-4 text-amber-600 rounded">
+                                <span class="text-sm text-slate-700">None of the above</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-4">Work/Life Stress Level (1-10)</label>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-slate-500">Low</span>
+                            <input type="range" name="workStress" min="1" max="10" value="5" class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer custom-range">
+                            <span class="text-sm text-slate-500">High</span>
+                            <span class="w-8 text-center font-medium copper-text" id="workStressValue">5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Health History -->
+            <div class="step-content" data-step="4">
+                <h2 class="text-xl sm:text-2xl font-light text-slate-800 text-center mb-6 sm:mb-8">Health History</h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">When did your current symptoms/concerns first begin?</label>
+                        <textarea name="whenStarted" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent h-24" placeholder="Please describe when you first noticed these symptoms..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">What do you believe may have caused or contributed to your current condition?</label>
+                        <textarea name="perceivedCause" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent h-24" placeholder="Any accidents, stress, lifestyle factors, etc..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">Have you received any previous treatments for your condition? If yes, please describe:</label>
+                        <textarea name="previousTreatments" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent h-24" placeholder="Medications, therapies, surgeries, etc..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">Are you currently taking any medications or supplements?</label>
+                        <textarea name="currentMedications" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent h-24" placeholder="List all current medications, vitamins, and supplements..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">Do you have any allergies or medical conditions we should be aware of?</label>
+                        <textarea name="allergiesMedical" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent h-24" placeholder="Food allergies, medical conditions, etc..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Goals -->
+            <div class="step-content" data-step="5">
+                <h2 class="text-xl sm:text-2xl font-light text-slate-800 text-center mb-6 sm:mb-8">Goals & Expectations</h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">What are your main goals for Spinal Flow treatment?</label>
+                        <textarea name="spinalFlowGoals" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent h-24" placeholder="What would you like to achieve through treatment?"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">How is your current condition affecting your daily life?</label>
+                        <textarea name="dailyLifeImpact" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent h-24" placeholder="Work, family, hobbies, sleep, mood, etc..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">What activities or aspects of life are you hoping to improve or return to?</label>
+                        <textarea name="hopesToImprove" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent h-24" placeholder="Sports, activities, general wellness goals..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-4">On a scale of 1-10, how ready are you to make lifestyle changes to support your healing?</label>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-slate-500">Not Ready</span>
+                            <input type="range" name="readyForChange" min="1" max="10" value="5" class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer custom-range">
+                            <span class="text-sm text-slate-500">Very Ready</span>
+                            <span class="w-8 text-center font-medium copper-text" id="readyValue">5</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">Is there anything else you'd like us to know about your health or wellness journey?</label>
+                        <textarea name="additionalInfo" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent h-32" placeholder="Any additional information that might help us provide the best care..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Declaration -->
+            <div class="step-content" data-step="6">
+                <h2 class="text-xl sm:text-2xl font-light text-slate-800 text-center mb-6 sm:mb-8">Client Declaration</h2>
+                
+                <div class="space-y-6">
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-6">
+                        <div class="space-y-4 text-slate-700 leading-relaxed">
+                            <p>By signing this form I consent to receiving the Spinal Flow technique.</p>
+                            <p>I understand the information I provide will only be used by <strong>Energiq Spinal Flow</strong>.</p>
+                            <p>I understand that with any healing process and work on my body, my symptoms may worsen before they improve.</p>
+                            <p>I understand this technique is designed to help remove stressors from the body to promote healing and health. I understand that results can take time and optimal health can be a process.</p>
+                            <p class="font-medium">I have freely decided to undergo the recommended treatment and hereby give my full consent to treatment.</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="flex items-start space-x-3 cursor-pointer">
+                            <input type="checkbox" name="consentGiven" required class="w-5 h-5 text-amber-600 rounded mt-1">
+                            <span class="text-slate-700 font-medium">I have read and understood the above declaration and give my consent to treatment.</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-3">Do you give permission for Energiq - Spinal Flow to use your photos/videos for promotional purposes?</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="photoVideoPermission" value="Yes, I give permission" class="w-4 h-4 text-amber-600">
+                                <span class="text-slate-700">Yes, I give permission</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="photoVideoPermission" value="No, I do not give permission" class="w-4 h-4 text-amber-600">
+                                <span class="text-slate-700">No, I do not give permission</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-2">Full Name (Digital Signature) *</label>
+                            <input type="text" name="signature" required class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all" placeholder="Type your full name as digital signature">
+                        </div>
+
+                        <div>
+                            <label class="block text-slate-700 font-medium mb-2">Date *</label>
+                            <input type="date" name="signatureDate" required class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all">
+                        </div>
+                    </div>
+
+                    <div class="text-center pt-6 border-t border-slate-200">
+                        <p class="text-lg font-medium text-slate-800 mb-2">Ready to submit your questionnaire</p>
+                        <p class="text-slate-600">Please review all information before submitting.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden fields for form processing -->
+            <input type="hidden" name="_subject" value="New Spinal Flow Questionnaire Submission">
+            <input type="hidden" name="_next" value="https://yourwebsite.com/thank-you">
+            <input type="hidden" name="_language" value="en">
+        </form>
+
+        <!-- Navigation -->
+        <div class="flex flex-col sm:flex-row justify-between gap-4 sm:gap-0 navigation-buttons">
+            <button type="button" id="prevBtn" class="flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 w-full sm:w-auto bg-slate-200 text-slate-700 hover:bg-slate-300 shadow-sm hover:shadow-md">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                <span>Previous</span>
+            </button>
+
+            <button type="button" id="nextBtn" class="flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 w-full sm:w-auto bg-gradient-to-r from-slate-600 to-slate-700 text-white hover:from-slate-700 hover:to-slate-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <span>Next</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+
+            <button type="submit" id="submitBtn" style="display: none;" class="flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <span>Submit Questionnaire</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Form navigation
+        let currentStep = 0;
+        const totalSteps = 7;
+        const steps = ['Welcome', 'Personal', 'Wellness', 'Lifestyle', 'Health History', 'Goals', 'Declaration'];
+        const icons = ['❤️', '👤', '🍃', '💧', '📅', '🌙', '❤️'];
+
+        // Generate symptoms list
+        const symptoms = [
+            'Dizziness', 'Fainting', 'Loss of memory', 'Tension and irritability', 'Headaches', 'Tinnitus',
+            'Migraine', 'Hearing problems', 'Loss of smell/taste', 'Light bothers eyes', 'Insomnia/sleeping issues',
+            'Neck pain/stiffness', 'Thyroid issues', 'Numbness of fingers', 'Shoulder pain', 'Cold hands/feet',
+            'Nervousness', 'Pins and needles in arms', 'Weight problems', 'Cold/flu symptoms', 'Chest pain',
+            'Allergies', 'Cold sweats', 'Shortness of breath', 'Pain in mid-spine', 'Stomach/digestive issues',
+            'Constipation/diarrhoea', 'Sciatica', 'Menstrual pain', 'Lower back pain', 'Balance loss',
+            'Numb toes', 'Stress', 'Depression', 'Chronic fatigue', 'Pins and needles Legs/Feet', 'Knee pain', 'Fibromyalgia'
+        ];
+
+        // Initialize form
+        function initForm() {
+            generateProgressCircles();
+            generateSymptoms();
+            updateNavigation();
+            setupEventListeners();
+            setCurrentDate();
+        }
+
+        function generateProgressCircles() {
+            const container = document.getElementById('progressContainer');
+            const positions = [
+                { left: '8%', top: '50%', size: 35 },
+                { left: '22%', top: '35%', size: 40 },
+                { left: '36%', top: '45%', size: 35 },
+                { left: '50%', top: '25%', size: 42 },
+                { left: '64%', top: '30%', size: 38 },
+                { left: '78%', top: '50%', size: 35 },
+                { left: '92%', top: '40%', size: 38 }
+            ];
+
+            container.innerHTML = '';
+            positions.forEach((pos, index) => {
+                const circle = document.createElement('div');
+                circle.className = `absolute flex flex-col items-center transition-all duration-700 progress-circle ${index <= currentStep ? 'completed' : ''}`;
+                circle.style.left = pos.left;
+                circle.style.top = pos.top;
+                circle.style.transform = 'translateX(-50%)';
+                
+                circle.innerHTML = `
+                    <div class="rounded-full flex items-center justify-center mb-1 transition-all duration-500 shadow-lg border-2 ${
+                        index <= currentStep 
+                            ? 'bg-gradient-to-br from-slate-600 to-slate-700 border-orange-400' 
+                            : 'bg-stone-200 border-stone-400'
+                    }" style="width: ${pos.size}px; height: ${pos.size}px; color: ${index <= currentStep ? '#b45309' : '#78716c'}; ${
+                        index <= currentStep ? 'box-shadow: 0 0 15px rgba(251, 146, 60, 0.6), 0 0 30px rgba(251, 146, 60, 0.3);' : ''
+                    }">
+                        <span style="font-size: ${Math.max(16, pos.size * 0.3)}px">${icons[index]}</span>
+                    </div>
+                    <div class="px-2 py-1 rounded-md text-center transition-all duration-300 ${
+                        index <= currentStep ? 'bg-slate-900/80 shadow-md' : 'bg-slate-700/60'
+                    }" style="min-width: max-content; white-space: nowrap;">
+                        <span class="text-white font-semibold leading-tight block text-xs">
+                            ${steps[index]}
+                        </span>
+                    </div>
+                `;
+                
+                container.appendChild(circle);
+            });
+        }
+
+        function generateSymptoms() {
+            const container = document.getElementById('symptomsContainer');
+            container.innerHTML = '';
+            
+            symptoms.forEach(symptom => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center space-x-2 cursor-pointer p-2 hover:bg-slate-50 rounded';
+                label.innerHTML = `
+                    <input type="checkbox" name="symptoms" value="${symptom}" class="w-4 h-4 text-amber-600 rounded">
+                    <span class="text-sm text-slate-700">${symptom}</span>
+                `;
+                container.appendChild(label);
+            });
+        }
+
+        function setupEventListeners() {
+            // Navigation buttons
+            document.getElementById('prevBtn').addEventListener('click', prevStep);
+            document.getElementById('nextBtn').addEventListener('click', nextStep);
+            
+            // Range sliders
+            const ranges = [
+                { input: 'input[name="stressLevel"]', display: 'stressValue' },
+                { input: 'input[name="happinessLevel"]', display: 'happinessValue' },
+                { input: 'input[name="workStress"]', display: 'workStressValue' },
+                { input: 'input[name="readyForChange"]', display: 'readyValue' }
+            ];
+            
+            ranges.forEach(range => {
+                const slider = document.querySelector(range.input);
+                const display = document.getElementById(range.display);
+                if (slider && display) {
+                    slider.addEventListener('input', (e) => {
+                        display.textContent = e.target.value;
+                    });
+                }
+            });
+        }
+
+        function setCurrentDate() {
+            const dateInput = document.querySelector('input[name="signatureDate"]');
+            if (dateInput) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps - 1) {
+                currentStep++;
+                showStep();
+                updateNavigation();
+                updateProgressBar();
+                generateProgressCircles();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                showStep();
+                updateNavigation();
+                updateProgressBar();
+                generateProgressCircles();
+            }
+        }
+
+        function showStep() {
+            document.querySelectorAll('.step-content').forEach((step, index) => {
+                step.classList.toggle('active', index === currentStep);
+            });
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            prevBtn.style.display = currentStep === 0 ? 'none' : 'flex';
+            
+            if (currentStep === totalSteps - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'flex';
+            } else {
+                nextBtn.style.display = 'flex';
+                submitBtn.style.display = 'none';
+            }
+        }
+
+        function updateProgressBar() {
+            const progressBar = document.getElementById('progressBar');
+            const percentage = ((currentStep + 1) / totalSteps) * 100;
+            progressBar.style.width = `${percentage}%`;
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initForm);
+
+        // Form submission handler
+        document.getElementById('spinalFlowForm').addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('border-red-500');
+                } else {
+                    field.classList.remove('border-red-500');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+            }
+        });
+    </script>
+</body>
+</html>
