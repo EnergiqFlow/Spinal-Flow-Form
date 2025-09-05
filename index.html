@@ -296,13 +296,13 @@ const SpinalFlowQuestionnaire = () => {
             <div className="relative h-40">
               {steps.map((step, index) => {
                 const Icon = step.icon;
-                // Even gaps between all circles, spread left to right
+                // SMOOTH EVEN SPACING across the full page width
                 const positions = [
-                  { left: '5%', top: '45%', size: 50 },    // Welcome - moved left for even spacing
-                  { left: '22%', top: '30%', size: 75 },   // Personal  
-                  { left: '39%', top: '40%', size: 65 },   // Wellness 
-                  { left: '56%', top: '15%', size: 85 },   // Lifestyle
-                  { left: '73%', top: '18%', size: 70 },   // Health History 
+                  { left: '10%', top: '45%', size: 50 },   // Welcome
+                  { left: '26%', top: '30%', size: 75 },   // Personal  
+                  { left: '42%', top: '40%', size: 65 },   // Wellness 
+                  { left: '58%', top: '15%', size: 85 },   // Lifestyle
+                  { left: '74%', top: '8%', size: 70 },    // Health History
                   { left: '90%', top: '45%', size: 45 }    // Final Details
                 ];
                 
